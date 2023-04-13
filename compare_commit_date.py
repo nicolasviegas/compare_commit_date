@@ -119,9 +119,7 @@ def write_excel_file():
     if period == 'I' or period == 'i':
         condition_write(2)
 
-
     elif period == 'U' or period == 'u':
-        print("Entre por el elif")
         condition_write(3)
 
     else:
@@ -130,6 +128,13 @@ def write_excel_file():
 
 
 def request_validation():
+    workbook = openpyxl.load_workbook(path)
+    worksheet = workbook.worksheets[0]
+    worksheet.insert_cols(4)
+    cell_title = worksheet.cell(row=1, column=4)
+    cell_title.value = 'Requiere validacion'
+    workbook.save(path)
+
     wb_obj = openpyxl.load_workbook(path)
 
     sheet_obj = wb_obj.active
@@ -138,7 +143,6 @@ def request_validation():
     max_col = sheet_obj.max_column
     max_r = sheet_obj.max_row
 
-    print(max_r)
     for i in range(2, max_r + 1):
         cell_obj = sheet_obj.cell(row=i, column=2)
 
@@ -147,9 +151,14 @@ def request_validation():
         date_u = cell_obj_u.value
         if date_wt != date_u:
             print("Requiere validacion")
+            workbook = openpyxl.load_workbook(path)
+            worksheet = workbook.worksheets[0]
+            cell_to_write = worksheet.cell(row=i, column=4)
+            cell_to_write.value = "yes"
+            workbook.save(path)
+
         else:
             print("No requiere validacion")
-
 
 
 def main():
