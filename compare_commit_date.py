@@ -4,33 +4,16 @@ Created on Fri Mar 31 15:48:54 2023
 
 @author: nviegas001
 """
-
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 25 14:33:34 2022
-
-@author: nviegas001
-"""
-
-# Python program to read an excel file
-
-# import openpyxl module
 import openpyxl
-import time
-import os
-import shutil
-# from pyautogui import *
-# import pyautogui
-# import pyperclip
-# #import keyboard
-# import tkinter as tk
-# from tkinter import simpledialog
-# from tkinter import messagebox
-
+from openpyxl import load_workbook
+import pandas as pd
+#import os
+#import shutil
+import tkinter as tk
+from tkinter import simpledialog
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
 
 # PATH ES LA DIRECCION DONDE SE ENCUENTRA EL EXCEL
 # PARENT DIR ES LA DIR DONDE SE VA A EJECUTAR EL SCRIPT Y DONDE SE VAN A CREAR LAS CARPETAS DE LOS CASOS
@@ -38,6 +21,12 @@ path = "/Users/nicolasviegas/Documents/full_screenshot.py/examples/excel.xlsx"
 # parent_dir = "C:\\Users\\nviegas001\\python-scripts\\"
 # download_dir = "C:\\Users\\nviegas001\\Downloads\\"
 github_list = []
+date_list = []
+
+root = tk.Tk()
+root.withdraw()
+period = simpledialog.askstring(title="Compare commits",
+                                prompt="Ingrese el periodo en el que se valida la fecha (I / U)")
 
 
 def code_list_to_analyze():
@@ -59,16 +48,21 @@ def code_list_to_analyze():
         github_list.append(str(link))
 
 
+def date_list_add(commit_date):
+    individual_date = str(commit_date)
+    date_list.append(str(individual_date))
+
+
 def obtain_date_commit(chrome, link):
     chrome.get(link)
-    commit = chrome.find_element(By.XPATH, "//relative-time[@class='no-wrap']").get_attribute("title")
+    commit_date = chrome.find_element(By.XPATH, "//relative-time[@class='no-wrap']").get_attribute("title")
 
-    print(commit)
+    date_list_add(commit_date)
 
 
 def open_list_links():
     chrome_options = webdriver.ChromeOptions()
-    # chrome_options.add_argument('--headless')
+    #chrome_options.add_argument('--headless') #No funciona en 2do plano
     chrome_options.add_argument("--start-maximized")
     chrome_options.add_experimental_option('detach', True)
 
@@ -76,6 +70,7 @@ def open_list_links():
                               options=chrome_options)
 
     chrome.get(github_list[0])
+
     chrome.find_element(By.ID, "login_field").send_keys("nicolasviegas")
     chrome.find_element(By.ID, "password").send_keys("EXWfS2J4#@cn")
     chrome.find_element(By.NAME, 'commit').click()
@@ -87,10 +82,24 @@ def open_list_links():
     chrome.quit()
 
 
+def write_excel_file():
+    wb_obj = openpyxl.load_workbook(path)
+
+    sheet_obj = wb_obj.active
+
+    if period == 'I' or period == 'i':
+        max_r = sheet_obj.max_row
+        for i in range(0, max_r-1):
+            print(date_list[i])
+
+
 def main():
+
     code_list_to_analyze()
 
     open_list_links()
+
+    write_excel_file()
 
 
 if __name__ == "__main__":
