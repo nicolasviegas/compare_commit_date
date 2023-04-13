@@ -28,6 +28,11 @@ root.withdraw()
 period = simpledialog.askstring(title="Compare commits",
                                 prompt="Ingrese el periodo en el que se valida la fecha (I / U)")
 
+root = tk.Tk()
+root.withdraw()
+pw = simpledialog.askstring(title="Compare commits",
+                                prompt="Ingrese password")
+
 
 def code_list_to_analyze():
     wb_obj = openpyxl.load_workbook(path)
@@ -72,7 +77,7 @@ def open_list_links():
     chrome.get(github_list[0])
 
     chrome.find_element(By.ID, "login_field").send_keys("nicolasviegas")
-    chrome.find_element(By.ID, "password").send_keys("EXWfS2J4#@cn")
+    chrome.find_element(By.ID, "password").send_keys(pw)
     chrome.find_element(By.NAME, 'commit').click()
 
     for i in github_list:
@@ -88,9 +93,70 @@ def write_excel_file():
     sheet_obj = wb_obj.active
 
     if period == 'I' or period == 'i':
-        max_r = sheet_obj.max_row
-        for i in range(0, max_r-1):
-            print(date_list[i])
+        #max_r = sheet_obj.max_row
+        #for i in range(0, max_r-1):
+        print("Entre por el if")
+        workbook = openpyxl.load_workbook(path)
+        worksheet = workbook.worksheets[0]
+        worksheet.insert_cols(2)
+        y = 2
+
+        cell_title = worksheet.cell(row=1, column=2)
+        cell_title.value = 'Fecha WT'
+
+        for x in range(len(date_list)):
+            cell_to_write = worksheet.cell(row=y, column=2)
+            cell_to_write.value = date_list[x]
+            print(date_list[x])
+            y += 1
+
+        workbook.save(path)
+
+    elif period == 'U' or period == 'u':
+        print("Entre por el elif")
+        workbook = openpyxl.load_workbook(path)
+        worksheet = workbook.worksheets[0]
+        worksheet.insert_cols(3)
+        y = 2
+
+        cell_title = worksheet.cell(row=1, column=3)
+        cell_title.value = 'Fecha Update'
+
+        for x in range(len(date_list)):
+            cell_to_write = worksheet.cell(row=y, column=3)
+            cell_to_write.value = date_list[x]
+            print(date_list[x])
+            y += 1
+
+        workbook.save(path)
+
+    else:
+        print("Ingrese una periodo valido ( I | U)")
+        quit()
+
+
+
+def request_validation():
+    wb_obj = openpyxl.load_workbook(path)
+
+    sheet_obj = wb_obj.active
+
+    cell_obj = sheet_obj.cell(row=1, column=2)
+    max_col = sheet_obj.max_column
+    max_r = sheet_obj.max_row
+
+    print(max_r)
+    for i in range(2, max_r + 1):
+        cell_obj = sheet_obj.cell(row=i, column=2)
+
+        date_wt = cell_obj.value
+        cell_obj_u = sheet_obj.cell(row=i, column=3)
+        date_u = cell_obj_u.value
+        if date_wt != date_u:
+            print("Requiere validacion")
+        else:
+            print("No requiere validacion")
+
 
 
 def main():
@@ -100,6 +166,8 @@ def main():
     open_list_links()
 
     write_excel_file()
+
+    request_validation()
 
 
 if __name__ == "__main__":
