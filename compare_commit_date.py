@@ -4,24 +4,25 @@ Created on Fri Mar 31 15:48:54 2023
 
 @author: nviegas001
 """
+import time
+
 import openpyxl
 from openpyxl import load_workbook
 import pandas as pd
-#import os
-#import shutil
 import tkinter as tk
 from tkinter import simpledialog
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-# PATH ES LA DIRECCION DONDE SE ENCUENTRA EL EXCEL
-# PARENT DIR ES LA DIR DONDE SE VA A EJECUTAR EL SCRIPT Y DONDE SE VAN A CREAR LAS CARPETAS DE LOS CASOS
 path = "/Users/nicolasviegas/Documents/full_screenshot.py/examples/excel.xlsx"
-# parent_dir = "C:\\Users\\nviegas001\\python-scripts\\"
-# download_dir = "C:\\Users\\nviegas001\\Downloads\\"
+
 github_list = []
 date_list = []
+
+root = tk.Tk()
+root.withdraw()
+#path = simpledialog.askstring(title="Compare commits", prompt="Ingrese la direccion del excel, debe terminar en .xlsx")
 
 root = tk.Tk()
 root.withdraw()
@@ -79,6 +80,7 @@ def open_list_links():
     chrome.find_element(By.ID, "login_field").send_keys("nicolasviegas")
     chrome.find_element(By.ID, "password").send_keys(pw)
     chrome.find_element(By.NAME, 'commit').click()
+    time.sleep(40)
 
     for i in github_list:
         if i != 'None':
@@ -87,53 +89,44 @@ def open_list_links():
     chrome.quit()
 
 
+def condition_write(column_number_condition):
+
+    workbook = openpyxl.load_workbook(path)
+    worksheet = workbook.worksheets[0]
+    worksheet.insert_cols(column_number_condition)
+    y = 2
+
+    cell_title = worksheet.cell(row=1, column=column_number_condition)
+    if column_number_condition == 2:
+        cell_title.value = 'Fecha WT'
+    else:
+        cell_title.value = 'Fecha Update'
+
+    for x in range(len(date_list)):
+        cell_to_write = worksheet.cell(row=y, column=column_number_condition)
+        cell_to_write.value = date_list[x]
+        print(date_list[x])
+        y += 1
+
+    workbook.save(path)
+
+
 def write_excel_file():
     wb_obj = openpyxl.load_workbook(path)
 
     sheet_obj = wb_obj.active
 
     if period == 'I' or period == 'i':
-        #max_r = sheet_obj.max_row
-        #for i in range(0, max_r-1):
-        print("Entre por el if")
-        workbook = openpyxl.load_workbook(path)
-        worksheet = workbook.worksheets[0]
-        worksheet.insert_cols(2)
-        y = 2
+        condition_write(2)
 
-        cell_title = worksheet.cell(row=1, column=2)
-        cell_title.value = 'Fecha WT'
-
-        for x in range(len(date_list)):
-            cell_to_write = worksheet.cell(row=y, column=2)
-            cell_to_write.value = date_list[x]
-            print(date_list[x])
-            y += 1
-
-        workbook.save(path)
 
     elif period == 'U' or period == 'u':
         print("Entre por el elif")
-        workbook = openpyxl.load_workbook(path)
-        worksheet = workbook.worksheets[0]
-        worksheet.insert_cols(3)
-        y = 2
-
-        cell_title = worksheet.cell(row=1, column=3)
-        cell_title.value = 'Fecha Update'
-
-        for x in range(len(date_list)):
-            cell_to_write = worksheet.cell(row=y, column=3)
-            cell_to_write.value = date_list[x]
-            print(date_list[x])
-            y += 1
-
-        workbook.save(path)
+        condition_write(3)
 
     else:
         print("Ingrese una periodo valido ( I | U)")
         quit()
-
 
 
 def request_validation():
